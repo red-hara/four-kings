@@ -1,10 +1,13 @@
 pico-8 cartridge // http://www.pico-8.com
 version 29
 __lua__
--- four kinigs
+-- four kings
 -- by red-hara
 -->8
 -- math
+
+-- transform with translation
+-- and rotation
 function trs(v,r)
 	return {
 		v=v,
@@ -12,6 +15,7 @@ function trs(v,r)
 	}
 end
 
+-- vector with x, y and z
 function vec(w,x,y,z)
 	return {
 		w=w,
@@ -21,6 +25,8 @@ function vec(w,x,y,z)
 	}
 end
 
+-- rotation with w and x
+-- consistent
 function rot_wx(a)
 	local c=cos(a)
 	local s=sin(a)
@@ -32,6 +38,7 @@ function rot_wx(a)
 	}
 end
 
+-- combine two transforms
 function trs_add(a,b)
 	return trs(
 		vec_add(a.v,rot_vec(a.r,b.v)),
@@ -39,6 +46,15 @@ function trs_add(a,b)
 	)
 end
 
+-- apply transform to vector
+function trs_app(t,v)
+	return vec_add(
+	 t.v,
+		rot_vec(t.r,v)
+	)
+end
+
+-- add two vectors
 function vec_add(a,b)
 	return vec(
 		a.w+b.w,
@@ -48,6 +64,7 @@ function vec_add(a,b)
 	)
 end
 
+-- rotate vector
 function rot_vec(r,v)
 	return vec(
 		r[1]*v.w+r[5]*v.x+r[9]*v.y+r[13]*v.z,
@@ -57,6 +74,7 @@ function rot_vec(r,v)
 	)
 end
 
+-- combine two rotations
 function rot_mul(a,b)
 	local res={
 		0,0,0,0,
@@ -72,4 +90,44 @@ function rot_mul(a,b)
 		end
 	end
 	return res
+end
+-->8
+-- graphics
+
+function wrfm(v,i)
+	local w={
+		v=v,
+		i=i
+	}
+	function w.draw(t)
+		-- todo
+	end
+	return w
+end
+
+function ptn(v)
+	local p={v=v}
+		unction p.draw(t,c)
+		local v=trs_app(t,p.v)
+		pset(v.x,v.y,c)
+	end
+	return p
+end
+-->8
+-- main
+
+function _init()
+	camera(-64,-64)
+	pt1=ptn(vec(0,0,10,0))
+	pt2=ptn(vec(0,5,5,0))
+end
+
+function _draw()
+	cls()
+	tr=trs(
+		vec(0,0,0,0),
+		rot_wx(t())
+	)
+	pt1.draw(tr,7)
+	pt2.draw(tr,7)
 end
