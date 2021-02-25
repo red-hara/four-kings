@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 29
+version 30
 __lua__
 -- four kings
 -- by red-hara
@@ -107,7 +107,7 @@ end
 
 function ptn(v)
 	local p={v=v}
-		unction p.draw(t,c)
+	function p.draw(t,c)
 		local v=trs_app(t,p.v)
 		pset(v.x,v.y,c)
 	end
@@ -118,8 +118,9 @@ end
 
 function _init()
 	camera(-64,-64)
-	pt1=ptn(vec(0,0,10,0))
-	pt2=ptn(vec(0,5,5,0))
+	local pt1=ptn(vec(0,0,10,0))
+	local pt2=ptn(vec(0,5,5,0))
+	ptns={pt1,pt2}
 end
 
 function _draw()
@@ -128,6 +129,7 @@ function _draw()
 		vec(0,0,0,0),
 		rot_wx(t())
 	)
-	pt1.draw(tr,7)
-	pt2.draw(tr,7)
+	for ptn in all(ptns) do
+		ptn.draw(tr, 7)
+	end
 end
