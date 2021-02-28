@@ -38,6 +38,39 @@ function rot_wx(a)
 	}
 end
 
+function rot_wy(a)
+	local c=cos(a)
+	local s=sin(a)
+	return {
+		1,0,0,0,
+		0,c,0,s,
+		0,0,1,0,
+		0,-s,0,c
+	}
+end
+
+function rot_wz(a)
+	local c=cos(a)
+	local s=sin(a)
+	return {
+		1,0,0,0,
+		0,c,-s,0,
+		0,s,c,0,
+		0,0,0,1
+	}
+end
+
+function rot_xy(a)
+	local c=cos(a)
+	local s=sin(a)
+	return {
+	 c,0,0,s,
+	 0,1,0,0,
+	 0,0,1,0,
+	 -s,0,0,c
+	}
+end
+
 -- combine two transforms
 function trs_add(a,b)
 	return trs(
@@ -82,10 +115,10 @@ function rot_mul(a,b)
 		0,0,0,0,
 		0,0,0,0
 	}
-	for i=1,4 do
-		for j=1,4 do
-			for k=1,4 do
-				res[i*4+j]+=a[i*4+k]*b[k*4+j]
+	for i=0,3 do
+		for j=0,3 do
+			for k=0,3 do
+				res[1+i*4+j]+=a[1+i*4+k]*b[1+k*4+j]
 			end
 		end
 	end
@@ -99,8 +132,18 @@ function wrfm(v,i)
 		v=v,
 		i=i
 	}
-	function w.draw(t)
-		-- todo
+	function w.draw(t,c)
+		for i in all(w.i) do
+			local s=trs_app(t,w.v[i[1]])
+			local e=trs_app(t,w.v[i[2]])
+			line(
+				s.x,
+				s.y,
+				e.x,
+				e.y,
+				c
+			)
+		end
 	end
 	return w
 end
@@ -118,18 +161,47 @@ end
 
 function _init()
 	camera(-64,-64)
-	local pt1=ptn(vec(0,0,10,0))
-	local pt2=ptn(vec(0,5,5,0))
-	ptns={pt1,pt2}
+	cube=wrfm(
+		{
+			vec(20,20,20,20),
+			vec(20,20,20,-20),
+			vec(20,20,-20,-20),
+			vec(20,20,-20,20),
+			vec(20,-20,20,20),
+			vec(20,-20,20,-20),
+			vec(20,-20,-20,-20),
+			vec(20,-20,-20,20),
+			vec(-10,10,10,10),
+			vec(-10,10,10,-10),
+			vec(-10,10,-10,-10),
+			vec(-10,10,-10,10),
+			vec(-10,-10,10,10),
+			vec(-10,-10,10,-10),
+			vec(-10,-10,-10,-10),
+			vec(-10,-10,-10,10)
+		},
+		{
+			{1,2},{2,3},{3,4},{4,1},
+			{5,6},{6,7},{7,8},{8,5},
+			{1,5},{2,6},{3,7},{4,8},
+			{9,10},{10,11},{11,12},{12,9},
+			{13,14},{14,15},{15,16},{16,13},
+			{9,13},{10,14},{11,15},{12,16}
+		}
+	)
 end
 
 function _draw()
 	cls()
 	tr=trs(
 		vec(0,0,0,0),
-		rot_wx(t())
+		rot_mul(
+			rot_mul(
+				rot_xy(t()/2),
+				rot_wz(t()/4)
+			),
+			rot_wy(t()/6)
+		)
 	)
-	for ptn in all(ptns) do
-		ptn.draw(tr, 7)
-	end
+	cube.draw(tr,7)
 end
